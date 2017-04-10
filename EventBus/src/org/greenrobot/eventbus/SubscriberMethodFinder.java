@@ -53,20 +53,25 @@ class SubscriberMethodFinder {
     }
 
     List<SubscriberMethod> findSubscriberMethods(Class<?> subscriberClass) {
+        //根据private static final Map<Class<?>, List<SubscriberMethod>> METHOD_CACHE = new ConcurrentHashMap<>();
+        // 得知METHOD_CACHE 是以订阅者类类型为键，订阅者订阅方法容器为值得缓存容器。
         List<SubscriberMethod> subscriberMethods = METHOD_CACHE.get(subscriberClass);
+        //如果在缓存容器里找到缓存方法集合则直接返回
         if (subscriberMethods != null) {
             return subscriberMethods;
         }
-
+        //没有缓存，执行
+        //利用反射查找注解，动态加载
         if (ignoreGeneratedIndex) {
-            subscriberMethods = findUsingReflection(subscriberClass);
-        } else {
+            subscriberMethods = findUsingReflection(subscriberClass);//进入方法>>>
+        } else {//利用注解器查找注解，静态加载
             subscriberMethods = findUsingInfo(subscriberClass);
         }
         if (subscriberMethods.isEmpty()) {
             throw new EventBusException("Subscriber " + subscriberClass
                     + " and its super classes have no public methods with the @Subscribe annotation");
         } else {
+            //找到注解方法后存入缓存
             METHOD_CACHE.put(subscriberClass, subscriberMethods);
             return subscriberMethods;
         }
@@ -137,7 +142,13 @@ class SubscriberMethodFinder {
         return null;
     }
 
+    /**
+     * 用反射方式获取订阅方法
+     * @param subscriberClass
+     * @return
+     */
     private List<SubscriberMethod> findUsingReflection(Class<?> subscriberClass) {
+        //从FindState池里取一个FindState
         FindState findState = prepareFindState();
         findState.initForSubscriber(subscriberClass);
         while (findState.clazz != null) {
@@ -159,8 +170,10 @@ class SubscriberMethodFinder {
         }
         for (Method method : methods) {
             int modifiers = method.getModifiers();
+            //订阅方法只能是public修饰
             if ((modifiers & Modifier.PUBLIC) != 0 && (modifiers & MODIFIERS_IGNORE) == 0) {
                 Class<?>[] parameterTypes = method.getParameterTypes();
+                //订阅方法只能有1个事件参书
                 if (parameterTypes.length == 1) {
                     Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
                     if (subscribeAnnotation != null) {
