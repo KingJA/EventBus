@@ -158,7 +158,7 @@ public class EventBus {
     private void subscribe(Object subscriber, SubscriberMethod subscriberMethod) {
         //获取订阅方法的返回类型
         Class<?> eventType = subscriberMethod.eventType;
-        //创建订阅协议
+        //创建订阅协议,含有注册的对象和消费方法
         Subscription newSubscription = new Subscription(subscriber, subscriberMethod);
         //Map<Class<?>, CopyOnWriteArrayList<Subscription>> subscriptionsByEventType;
         CopyOnWriteArrayList<Subscription> subscriptions = subscriptionsByEventType.get(eventType);
