@@ -259,6 +259,7 @@ public class EventBus {
      * Posts the given event to the event bus.
      */
     public void post(Object event) {
+        //PostingThreadState线程数据存取器
         PostingThreadState postingState = currentPostingThreadState.get();
         List<Object> eventQueue = postingState.eventQueue;
         eventQueue.add(event);
